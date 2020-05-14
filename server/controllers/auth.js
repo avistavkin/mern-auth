@@ -92,4 +92,4 @@ exports.signin = (req, res) => {
 	res.json({
 		data: 'я тебя съем'
 	});
-}; //test commit
+};
