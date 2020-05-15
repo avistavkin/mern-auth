@@ -123,10 +123,39 @@ exports.accountActivation = (req, res) => {
 
 
 };
-
+/*
 exports.signin = (req, res) => {
 	console.log("REQ BODY ON SIGNIN", req.body);
 	res.json({
 		data: 'я тебя съем'
+	});
+};*/
+
+exports.signin = (req, res) => {
+	const {email, password} = req.body
+	//check if user exist
+	User.findOne({email}).exec((err, user) => { //тут exec - это чисто функция mongoose
+		if (err || !user) {
+			return res.status(400).json({
+				error: 'User with that email does not exist. Please signup.'
+			})
+
+		}
+		//authenticate
+		if(!user.authenticate(password)){
+			return res.status(400).json({
+				error: 'Email or password do not match'	
+		})
+
+		}
+		//generate a token and send to client
+		const token = jwt.sign({_id: user._id}, process.env.JWT_SECRET, {expiresIn: '1d'});
+		const {_id, name, email, role} = user
+
+		return res.json({
+			token,
+			user: {_id, name, email, role}
+
+		});
 	});
 };

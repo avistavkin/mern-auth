@@ -47,8 +47,8 @@ userSchema.virtual('password')
     });
  
 userSchema.methods = {
-    authenticate: function(plainText) { // а вот это как раз то место, где происходит проверка 
-        return this.encryptPassword(plainText) === this.hashed_password;
+    authenticate: function(plainText) { // а вот это как раз то место, где происходит проверка пароля 
+        return this.encryptPassword(plainText) === this.hashed_password; //true or false
     },
  
     encryptPassword: function(password) {
