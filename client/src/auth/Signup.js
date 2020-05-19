@@ -1,5 +1,5 @@
 import React, {useState} from 'react';
-//import {Link, Redirect} from 'react-router-dom';
+import {Link, Redirect} from 'react-router-dom';
 import Layout from '../core/Layout';
 import axious from 'axios';
 import {ToastContainer, toast} from 'react-toastify';
@@ -36,7 +36,7 @@ const Signup = () => {
 			toast.success(response.data.message);
 		})
 		.catch(error => {
-			console.log('SIGNUP ERROR', error.response.data); 
+			console.log('SIGNUP ERROR', error.response.data.error); 
 			//error.response.data - данные ошибки будут переданы из бэкенда.
 			setValues({...values, buttonText: 'Submit'});
 			toast.error(error.response.data.error);
@@ -74,7 +74,6 @@ const Signup = () => {
 		<Layout>
 			<div className="col-md-6 offset-md-3">
 				<ToastContainer />
-				{JSON.stringify({name, email, password})}; 
 				<h1 className="p-5 text-center">Signup to xSet!</h1>
 				{signupForm()}
 			</div>
