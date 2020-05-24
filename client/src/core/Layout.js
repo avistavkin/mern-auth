@@ -28,26 +28,32 @@ const Layout = ({children, match, history}) => {
 							Signin
 						</Link>
 					</li>
-					<li className="nav-item">
+{/*					
+
+Этот блок выключил, чтобы убрать раздел в шапке - после того, как добавил ссылку Signup в разделе Signin
+
+						<li className="nav-item">
 						<Link to="/signup" className="nav-link" style={isActive('/signup')}>
 							Signup
 						</Link>
 					</li>
-
+ */}
 				</Fragment>
 
 			)}
 
-			{isAuth() && (
+			{isAuth() && isAuth().role == 'admin' && (
 				<li className="nav-item">
-					<span 
-						className="nav-link" 
-						style={{cursor: 'pointer', color: '#fff'}} 
-						>
-						{isAuth().name}'s profile
-		
-						</span>
-
+						<Link className="nav-link" style={isActive('/admin')} to="/admin" >
+							{isAuth().name} 
+						</Link>
+				</li>
+			)}
+			{isAuth() && isAuth().role == 'subscriber' && (
+				<li className="nav-item">
+						<Link className="nav-link" style={isActive('/private')} to="/private">
+							{isAuth().name} 
+						</Link>
 				</li>
 
 			)}
