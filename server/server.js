@@ -23,7 +23,8 @@ mongoose.connect(process.env.DATABASE, {
 
 //import routes
 
-const authRoutes = require ('./routes/auth')
+const authRoutes = require ('./routes/auth');
+const userRoutes = require ('./routes/user');
 
 // app middlewares
 
@@ -38,7 +39,7 @@ if (process.env.NODE_ENV = 'development') {
 //middleware
 
 app.use('/api', authRoutes);
-
+app.use('/api', userRoutes);
 
 
 
