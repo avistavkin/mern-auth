@@ -1,5 +1,6 @@
 const User = require ('../models/user');
 const jwt = require('jsonwebtoken');
+const expressJwt = require('express-jwt');
 
 //sendgrid
 
@@ -159,3 +160,9 @@ exports.signin = (req, res) => {
 		});
 	});
 };
+
+
+exports.requireSignin = expressJwt({
+	secret: process.env.JWT_SECRET //может вернуть req.user
+
+});
