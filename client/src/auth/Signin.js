@@ -1,5 +1,5 @@
 import React, {useState} from 'react';
-import {Link, Redirect} from 'react-router-dom';
+import {Redirect} from 'react-router-dom';
 import Layout from '../core/Layout';
 import axious from 'axios';
 import {authenticate, isAuth} from './helpers'
@@ -37,7 +37,7 @@ const Signin = ({history}) => {
 			authenticate(response, () => {
 				setValues({...values, name: '', email: '', password: '', buttonText: 'Submitted'});
 				//toast.success(`Hey ${response.data.user.name}, Welcome back!`);
-				isAuth () && isAuth().role == 'admin' ? history.push('/admin') : history.push('/private')
+				isAuth () && isAuth().role === 'admin' ? history.push('/admin') : history.push('/private')
 
 			})
 
@@ -59,11 +59,11 @@ const Signin = ({history}) => {
 	const signinForm = () => (
 		<form>
 			<div className="form-group">
-				<lable className="text-mute"> Email</lable>
+				<label className="text-mute"> Email</label>
 				<input onChange={handleChange('email')} value = {email} type="email" className="form-control"/>
 			</div>
 			<div className="form-group">
-				<lable className="text-mute"> Password</lable>
+				<label className="text-mute"> Password</label>
 				<input onChange={handleChange('password')} value = {password} type="password" className="form-control"/>
 			</div>
 			<div>
@@ -72,8 +72,8 @@ const Signin = ({history}) => {
 			</div>
 			
 			<div>
-				<lable className="text-mute"> Do not have account yet? Please 
-				<a href="./Signup"> Signup </a> </lable>
+				<label className="text-mute"> Do not have account yet? Please 
+				<a href="./Signup"> Signup </a> </label>
 
 			</div>			
 		</form>

@@ -42,14 +42,14 @@ const Layout = ({children, match, history}) => {
 
 			)}
 
-			{isAuth() && isAuth().role == 'admin' && (
+			{isAuth() && isAuth().role === 'admin' && (
 				<li className="nav-item">
 						<Link className="nav-link" style={isActive('/admin')} to="/admin" >
 							{isAuth().name} 
 						</Link>
 				</li>
 			)}
-			{isAuth() && isAuth().role == 'subscriber' && (
+			{isAuth() && isAuth().role ==='subscriber' && (
 				<li className="nav-item">
 						<Link className="nav-link" style={isActive('/private')} to="/private">
 							{isAuth().name} 

@@ -1,5 +1,5 @@
 import React, {useState, useEffect } from 'react';
-import {Link, Redirect} from 'react-router-dom';
+//import {Link, Redirect} from 'react-router-dom';
 import Layout from '../core/Layout';
 import axious from 'axios';
 import jwt from 'jsonwebtoken';
