@@ -1,6 +1,7 @@
 const User = require ('../models/user');
 const jwt = require('jsonwebtoken');
 const expressJwt = require('express-jwt');
+const _ = require ('lodash')
 
 //sendgrid
 
@@ -183,3 +184,97 @@ exports.adminMiddleware = (req, res, next) => {
 
 	});
 };
+
+
+exports.forgotPassword = (req, res) => {
+	const {email} = req.body
+
+	User.findOne({email}, (err, user) => {
+		if(err || !user) {
+			return res.status(400).json({
+				error: 'User with such email does not exist'
+			})
+		}
+
+
+		const token = jwt.sign({ _id: user._id}, process.env.JWT_RESET_PASSWORD, {expiresIn: '10m'}); //если такого email в базе нет - генерирует токен
+
+		const emailData = {						//эти данные мы планируем осылать на почту пользователям импользуюя sendgrid
+			from: process.env.EMAIL_FROM,
+			to: email,
+			subject: `Password reset link`,
+			html: `
+			<h1>Please use the link to reset your password</h1>
+			<p>${process.env.CLIENT_URL}/auth/password/reset/${token}</p>
+			</hr>
+			<p>This email may contain sensetive information</p>
+			<p>${process.env.CLIENT_URL}
+
+			`
+		};
+
+		return user.updateOne({resetPasswordLink: token}, (err, success) => {
+			if(err) {
+				console.log('RESET PASSWORD LINK ERROR', err);
+				return res.status(400).json({
+					error: 'Database connection error on user password forgot request'
+				});
+			} else {
+				sgMail
+					.send(emailData)
+					.then(sent => { //а это строка непосредственно дёргает sendgrid
+					console.log('RESET PASSWORD EMAIL SENT', sent)
+					return res.json({message: `Email has been sent to ${email}. Follow the instruction to reset the password.`
+					});
+
+				})
+				.catch(err => {
+		                 console.log('RESET PASSWORD SENT ERROR', err)
+		                return res.json({
+		                    message: `brrr ${err.message}`
+		                });
+		            });
+
+			}
+		});
+	});
+
+};
+
+exports.resetPassword = (req, res) => {
+	const {resetPasswordLink, newPassword} = req.body;
+
+	if(resetPasswordLink) 
+	{
+		jwt.verify(resetPasswordLink, process.env.JWT_RESET_PASSWORD, function(err, decoded) {
+			if(err) {
+				return res.status(400).json({error: 'Expired link. Try again'});
+
+			}
+			
+			User.findOne({resetPasswordLink}, (err, user) => {
+				if(err) {
+					return res.status(400).json({error: 'Something went wrong. Try again later.'});
+				}
+
+				const updatedFields = {
+					password: newPassword,
+					resetPasswordLink: ''
+				}
+
+				user = _.extend(user, updatedFields)
+				
+				user.save((err, result) => {
+					if(err) {
+						return res.status(400).json({error: 'Error resetting user password'});
+					}
+
+					res.json({message: `Great! Now you can login with your new password!`});
+				});
+
+			});
+
+		});
+	}; 
+};
+	
