@@ -1,15 +1,12 @@
-const User = require ('../models/user');
-const jwt = require('jsonwebtoken');
-const expressJwt = require('express-jwt');
-const _ = require ('lodash')
+const User = require("../models/user");
+const jwt = require("jsonwebtoken");
+const expressJwt = require("express-jwt");
+const _ = require("lodash");
 
 //sendgrid
 
-const sgMail = require('@sendgrid/mail');
+const sgMail = require("@sendgrid/mail");
 sgMail.setApiKey(process.env.SENDGRID_API_KEY);
-
-
-
 
 /*// закомментировали, когда стали писать email workflow
 exports.signup = (req, res) => {
@@ -44,20 +41,26 @@ exports.signup = (req, res) => {
 
 	});
 };*/
- 
-exports.signup = (req, res) => {
-	const {name, email, password} = req.body // получить данные из ввода от пользователя
 
-	User.findOne({email: email}).exec((err, user) => { //поиск в базе данных вхождения email
-		if (user){
+exports.signup = (req, res) => {
+	const { name, email, password } = req.body; // получить данные из ввода от пользователя
+
+	User.findOne({ email: email }).exec((err, user) => {
+		//поиск в базе данных вхождения email
+		if (user) {
 			return res.status(400).json({
-				error : 'Email is taken' //сообщение пользователю который ввел уже имеющийся в бд адрес почты
+				error: "Email is taken", //сообщение пользователю который ввел уже имеющийся в бд адрес почты
 			});
 		}
 
-		const token = jwt.sign({name, email, password}, process.env.JWT_ACCOUNT_ACTIVATION, {expiresIn: '20m'}); //если такого email в базе нет - генерирует токен
+		const token = jwt.sign(
+			{ name, email, password },
+			process.env.JWT_ACCOUNT_ACTIVATION,
+			{ expiresIn: "20m" }
+		); //если такого email в базе нет - генерирует токен
 
-		const emailData = {						//эти данные мы планируем осылать на почту пользователям импользуюя sendgrid
+		const emailData = {
+			//эти данные мы планируем осылать на почту пользователям импользуюя sendgrid
 			from: process.env.EMAIL_FROM,
 			to: email,
 			subject: `Account activation link`,
@@ -68,62 +71,65 @@ exports.signup = (req, res) => {
 			<p>This email may contain sensetive information</p>
 			<p>${process.env.CLIENT_URL}
 
-			`
+			`,
 		};
 
 		sgMail
 			.send(emailData)
-			.then(sent => { //а это строка непосредственно дёргает sendgrid
-			console.log('SUNGUP EMAIL SENT', sent)
-			return res.json({message: `Email has been sent to ${email}.`
+			.then((sent) => {
+				//а это строка непосредственно дёргает sendgrid
+				console.log("SUNGUP EMAIL SENT", sent);
+				return res.json({
+					message: `Email has been sent to ${email}.`,
+				});
+			})
+			.catch((err) => {
+				console.log("SIGNUP EMAIL SENT ERROR", err);
+				return res.json({
+					message: `brrr ${err.message}`,
+				});
 			});
-
-		})
-		.catch(err => {
-                 console.log('SIGNUP EMAIL SENT ERROR', err)
-                return res.json({
-                    message: `brrr ${err.message}`
-                });
-            });
-
 	});
- };
+};
 
 exports.accountActivation = (req, res) => {
-	const {token} = req.body 
+	const { token } = req.body;
 
-	if (token){ //проверка токена, что он не заэкспайрился
-		jwt.verify(token, process.env.JWT_ACCOUNT_ACTIVATION, function (err, decoded){ //нужно два аргумента и функция проверки
-			if(err) {
-				console.log('JWT VERIFY IN ACCOUNT ACTIVATION ERROR', err)
+	if (token) {
+		//проверка токена, что он не заэкспайрился
+		jwt.verify(token, process.env.JWT_ACCOUNT_ACTIVATION, function (
+			err,
+			decoded
+		) {
+			//нужно два аргумента и функция проверки
+			if (err) {
+				console.log("JWT VERIFY IN ACCOUNT ACTIVATION ERROR", err);
 				return res.status(401).json({
-					error: 'Expired link. Signup again' 
-				})
+					error: "Expired link. Signup again",
+				});
 			}
-			const {name, email, password} = jwt.decode(token) // через функцию decode достаём данные из токена и заполняем массив
+			const { name, email, password } = jwt.decode(token); // через функцию decode достаём данные из токена и заполняем массив
 
-			const user = new User ({name, email, password})
+			const user = new User({ name, email, password });
 
-			user.save ((err, user) =>{
-				if(err) {
-					console.log('SAVE USER IN ACCOUNT ACTIVATION ERROR', err)
+			user.save((err, user) => {
+				if (err) {
+					console.log("SAVE USER IN ACCOUNT ACTIVATION ERROR", err);
 					return res.status(401).json({
-						error: 'Error saving user in database. Try signup again.'
+						error:
+							"Error saving user in database. Try signup again.",
 					});
 				}
 				return res.json({
-					message: 'Signup success. Please signin'
-				})
+					message: "Signup success. Please signin",
+				});
 			});
-		}); 
-
+		});
 	} else {
 		return res.json({
-					message: 'Something went wrong. Try again.'
-				})
+			message: "Something went wrong. Try again.",
+		});
 	}
-
-
 };
 /*
 exports.signin = (req, res) => {
@@ -134,72 +140,73 @@ exports.signin = (req, res) => {
 };*/
 
 exports.signin = (req, res) => {
-	const {email, password} = req.body
+	const { email, password } = req.body;
 	//check if user exist
-	User.findOne({email}).exec((err, user) => { //тут exec - это чисто функция mongoose
+	User.findOne({ email }).exec((err, user) => {
+		//тут exec - это чисто функция mongoose
 		if (err || !user) {
 			return res.status(400).json({
-				error: 'User with that email does not exist. Please signup.'
-			})
-
+				error: "User with that email does not exist. Please signup.",
+			});
 		}
 		//authenticate
-		if(!user.authenticate(password)){
+		if (!user.authenticate(password)) {
 			return res.status(400).json({
-				error: 'Email or password do not match'	
-		})
-
+				error: "Email or password do not match",
+			});
 		}
 		//generate a token and send to client
-		const token = jwt.sign({_id: user._id}, process.env.JWT_SECRET, {expiresIn: '1d'});
-		const {_id, name, email, role} = user
+		const token = jwt.sign({ _id: user._id }, process.env.JWT_SECRET, {
+			expiresIn: "1d",
+		});
+		const { _id, name, email, role } = user;
 
 		return res.json({
 			token,
-			user: {_id, name, email, role}
-
+			user: { _id, name, email, role },
 		});
 	});
 };
 
-
 exports.requireSignin = expressJwt({
-	secret: process.env.JWT_SECRET //может вернуть req.user
-
+	secret: process.env.JWT_SECRET, //может вернуть req.user
 });
 
-
 exports.adminMiddleware = (req, res, next) => {
-	User.findById({_id: req.user._id}).exec((err, user) => {
-		if(err || !user) {
-					return res.status(400).json({error: 'User not found.'});
+	User.findById({ _id: req.user._id }).exec((err, user) => {
+		if (err || !user) {
+			return res.status(400).json({ error: "User not found." });
 		}
 
-		if(user.role != 'admin') {
-					return res.status(400).json({error: 'Admin resource. Access denied.'});
+		if (user.role != "admin") {
+			return res
+				.status(400)
+				.json({ error: "Admin resource. Access denied." });
 		}
 
 		req.profile = user;
 		next();
-
 	});
 };
 
-
 exports.forgotPassword = (req, res) => {
-	const {email} = req.body
+	const { email } = req.body;
 
-	User.findOne({email}, (err, user) => {
-		if(err || !user) {
+	User.findOne({ email }, (err, user) => {
+		if (err || !user) {
 			return res.status(400).json({
-				error: 'User with such email does not exist'
-			})
+				error: "User with such email does not exist",
+			});
 		}
 
+		const token = jwt.sign(
+			{ _id: user._id, name: user.name },
+			process.env.JWT_RESET_PASSWORD,
+			{ expiresIn: "10m" }
+		); //если такого email в базе нет - генерирует токен
 
-		const token = jwt.sign({ _id: user._id}, process.env.JWT_RESET_PASSWORD, {expiresIn: '10m'}); //если такого email в базе нет - генерирует токен
-
-		const emailData = {						//эти данные мы планируем осылать на почту пользователям импользуюя sendgrid
+		const emailData = {
+			//эти данные мы планируем осылать на почту пользователям импользуюя sendgrid
 			from: process.env.EMAIL_FROM,
 			to: email,
 			subject: `Password reset link`,
@@ -210,71 +217,79 @@ exports.forgotPassword = (req, res) => {
 			<p>This email may contain sensetive information</p>
 			<p>${process.env.CLIENT_URL}
 
-			`
+			`,
 		};
 
-		return user.updateOne({resetPasswordLink: token}, (err, success) => {
-			if(err) {
-				console.log('RESET PASSWORD LINK ERROR', err);
+		return user.updateOne({ resetPasswordLink: token }, (err, success) => {
+			if (err) {
+				console.log("RESET PASSWORD LINK ERROR", err);
 				return res.status(400).json({
-					error: 'Database connection error on user password forgot request'
+					error:
+						"Database connection error on user password forgot request",
 				});
 			} else {
 				sgMail
 					.send(emailData)
-					.then(sent => { //а это строка непосредственно дёргает sendgrid
-					console.log('RESET PASSWORD EMAIL SENT', sent)
-					return res.json({message: `Email has been sent to ${email}. Follow the instruction to reset the password.`
+					.then((sent) => {
+						//а это строка непосредственно дёргает sendgrid
+						console.log("RESET PASSWORD EMAIL SENT", sent);
+						return res.json({
+							message: `Email has been sent to ${email}. Follow the instruction to reset the password.`,
+						});
+					})
+					.catch((err) => {
+						console.log("RESET PASSWORD SENT ERROR", err);
+						return res.json({
+							message: `brrr ${err.message}`,
+						});
 					});
-
-				})
-				.catch(err => {
-		                 console.log('RESET PASSWORD SENT ERROR', err)
-		                return res.json({
-		                    message: `brrr ${err.message}`
-		                });
-		            });
-
 			}
 		});
 	});
-
 };
 
 exports.resetPassword = (req, res) => {
-	const {resetPasswordLink, newPassword} = req.body;
+	const { resetPasswordLink, newPassword } = req.body;
 
-	if(resetPasswordLink) 
-	{
-		jwt.verify(resetPasswordLink, process.env.JWT_RESET_PASSWORD, function(err, decoded) {
-			if(err) {
-				return res.status(400).json({error: 'Expired link. Try again'});
-
+	if (resetPasswordLink) {
+		jwt.verify(resetPasswordLink, process.env.JWT_RESET_PASSWORD, function (
+			err,
+			decoded
+		) {
+			if (err) {
+				return res
+					.status(400)
+					.json({ error: "Expired link. Try again" });
 			}
-			
-			User.findOne({resetPasswordLink}, (err, user) => {
-				if(err) {
-					return res.status(400).json({error: 'Something went wrong. Try again later.'});
+
+			User.findOne({ resetPasswordLink }, (err, user) => {
+				if (err) {
+					return res
+						.status(400)
+						.json({
+							error: "Something went wrong. Try again later.",
+						});
 				}
 
 				const updatedFields = {
 					password: newPassword,
-					resetPasswordLink: ''
-				}
+					resetPasswordLink: "",
+				};
 
-				user = _.extend(user, updatedFields)
-				
+				user = _.extend(user, updatedFields);
+
 				user.save((err, result) => {
-					if(err) {
-						return res.status(400).json({error: 'Error resetting user password'});
+					if (err) {
+						return res
+							.status(400)
+							.json({ error: "Error resetting user password" });
 					}
 
-					res.json({message: `Great! Now you can login with your new password!`});
+					res.json({
+						message: `Great! Now you can login with your new password!`,
+					});
 				});
-
 			});
-
 		});
-	}; 
+	}
 };
-	
