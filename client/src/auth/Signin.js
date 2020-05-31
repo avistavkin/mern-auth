@@ -123,7 +123,7 @@ const Signin = ({ history }) => {
 				<h1 className="p-5 text-center">Signin to xSet!</h1>
 				<Google informParent={informParent} />
 				<Facebook informParent={informParent} />
-				<Microsoft />
+				<Microsoft informParent={informParent} />
 				{signinForm()}
 			</div>
 		</Layout>
