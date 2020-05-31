@@ -4,6 +4,8 @@ import Layout from "../core/Layout";
 import axious from "axios";
 import { authenticate, isAuth } from "./helpers";
 import { ToastContainer, toast } from "react-toastify";
+import Google from "./Google";
+import Microsoft from "./Microsoft";
 import "react-toastify/dist/ReactToastify.min.css";
 
 const Signin = ({ history }) => {
@@ -19,6 +21,14 @@ const Signin = ({ history }) => {
 		//обработчики событий
 		console.log(event.target.value); //для новичков вывод логов в консоль
 		setValues({ ...values, [name]: event.target.value });
+	};
+
+	const informParent = (response) => {
+		authenticate(response, () => {
+			isAuth() && isAuth().role === "admin"
+				? history.push("/admin")
+				: history.push("/private");
+		});
 	};
 
 	const clickSubmit = (event) => {
@@ -110,6 +120,8 @@ const Signin = ({ history }) => {
 				<ToastContainer />
 				{isAuth() ? <Redirect to="/" /> : null}
 				<h1 className="p-5 text-center">Signin to xSet!</h1>
+				<Google informParent={informParent} />
+				<Microsoft />
 				{signinForm()}
 			</div>
 		</Layout>
