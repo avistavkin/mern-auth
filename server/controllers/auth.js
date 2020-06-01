@@ -355,13 +355,15 @@ exports.facebookLogin = (req, res) => {
 
     const url = `https://graph.facebook.com/v2.11/${userID}/?fields=id,name,email&access_token=${accessToken}`;
 
+
     return (
         fetch(url, {
             method: 'GET'
         })
             .then(response => response.json())
             // .then(response => console.log(response))
-            .then(response => {
+            .then(response => 
+            {
                 const { email, name } = response;
                 User.findOne({ email }).exec((err, user) => {
                     if (user) {
@@ -394,6 +396,67 @@ exports.facebookLogin = (req, res) => {
             .catch(error => {
                 res.json({
                     error: 'Facebook login failed. Try later'
+                });
+            })
+    );
+};
+
+
+exports.microsoftLogin = (req, res) => {
+    console.log('MICROSOFT LOGIN REQ BODY', req.body);
+    const { name, email, id, accessToken } = req.body;
+
+    //const url = `https://graph.facebook.com/v2.11/${id}/?fields=id,name,email&access_token=${accessToken}`;
+    
+    //короче вот тут с URI очень большой вопрос!!!!
+    const url = `https://login.microsoftonline.com/4b852b6d-c876-4833-972d-728dffcd7376`;
+    //пользователь попадпет в базу Mongo с любым URL!!!
+    return (
+        fetch(url, {method: 'GET'})
+            //.then(response => response.json())
+            //.then(response => console.log('STRING416 - response', response, name))
+            .then(response => console.log('417EMAIL, NAME', email, name))
+            .then(response => {
+                //const { email, name } = response;
+                const { email, name } = req.body;
+                console.log('420EMAIL, NAME', email, name)
+                User.findOne({ email }).exec((err, user) => {
+                	//console.log("423USER", user)
+                	//console.log("424USER_ID", user._id)
+                    if (user) {
+                        const token = jwt.sign({ _id: user._id }, process.env.JWT_SECRET, { expiresIn: '7d' });
+                        console.log("427TOKEN", token);
+                        const { _id, email, name, role } = user;
+                        console.log("431USER", user);
+                        return res.json({
+                            token,
+                            user: { _id, email, name, role }
+                        });
+                    } else {
+                        console.log('436LET PASSWORD')
+                        let password = email + process.env.JWT_SECRET;
+                        user = new User({ name, email, password });
+                        user.save((err, data) => {
+                            if (err) {
+                                console.log('ERROR MICROSOFT LOGIN ON USER SAVE', err);
+                                return res.status(400).json({
+                                    error: 'User signup failed with microsoft'
+                                });
+                            }
+                            const token = jwt.sign({ _id: data._id }, process.env.JWT_SECRET, { expiresIn: '7d' });
+                            const { _id, email, name, role } = data;
+                            return res.json({
+                                token,
+                                user: { _id, email, name, role }
+                            });
+                        });
+                    }
+                });
+            })
+            .catch(error => {
+            	console.log(error);
+                res.json({
+                    error: 'Microsoft login failed. Try later'
                 });
             })
     );

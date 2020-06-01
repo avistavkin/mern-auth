@@ -2,20 +2,30 @@ import React from "react";
 import axious from "axios";
 import MicrosoftLogin from "react-microsoft-login";
 
-const Microsoft = () => {
-	  	const responseMicrosoft = (err, data) => {
-      	console.log(err, data);
+const Microsoft = ({ informParent = (f) => f }) => {
+	  	const responseMicrosoft = (err, authData) => {
+      	console.log(err, authData);
+      	console.log('ACCESSTOKEN', authData.authResponseWithAccessToken.accessToken);
+      	console.log('EMAIL', authData.authResponseWithAccessToken.account.userName)
+		console.log('USERNAME', authData.authResponseWithAccessToken.account.name)
+		console.log('ID', authData.authResponseWithAccessToken.account.accountIdentifier);
 		axious({
 			method: "POST",
 		 	url: `${process.env.REACT_APP_API}/microsoft-login`,
 		 	data: { 
-		 		accessToken: data.accessToken,
-		 		id: data.id
+		 		accessToken: authData.authResponseWithAccessToken.accessToken,
+		 		id: authData.authResponseWithAccessToken.account.accountIdentifier,
+		 		email: authData.authResponseWithAccessToken.account.userName,
+		 		name: authData.authResponseWithAccessToken.account.name
 		 	},
+
+
 		})
-		.then((data) => {
-		 	console.log("MICROSOFT SIGNIN SUCCESS", data);
+
+		.then((authData) => {
+		 	console.log("MICROSOFT SIGNIN SUCCESS", authData);
 		 		//inform parent component
+		 	informParent(authData);
 		})
 		.catch((err) => {
 		 	console.log("MICROSOFT SIGNIN ERROR", err.response);
@@ -26,15 +36,14 @@ const Microsoft = () => {
 			<MicrosoftLogin
 				clientId={`${process.env.REACT_APP_MICROSOFT_CLIENT_ID}`}
 				authCallback={responseMicrosoft}
-				render={(renderProps) => (
-					<button
-						onClick={renderProps.onClick}
-						className="btn btn-primary btn-lg btn-block"
-					>
-						<i className="fab fa-microsoft pr-2"></i> Login with
-						Microsoft
+				buttonTheme = "dark_short"
+				debug = {true}
+				children = {
+					<button className="btn btn-blue btn-lg btn-block">
+						<i className="fab fa-microsoft pr-2"></i> Login with Microsoft
 					</button>
-				)}
+				}
+
 			/>
 		</div>
 	);

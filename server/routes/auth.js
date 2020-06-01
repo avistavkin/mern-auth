@@ -11,7 +11,7 @@ const {
 	resetPassword,
 	googleLogin,
 	facebookLogin,
-	//microsoftLogin
+	microsoftLogin,
 } = require("../controllers/auth");
 
 //import validators
@@ -46,7 +46,7 @@ router.put(
 //google, facebook and microsoft
 router.post("/google-login", googleLogin);
 router.post("/facebook-login", facebookLogin);
-//router.post("/microsoft-login", microsoftLogin);
+router.post("/microsoft-login", microsoftLogin);
 
 
 module.exports = router;
