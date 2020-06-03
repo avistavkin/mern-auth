@@ -1,7 +1,6 @@
 {
   "name": "server",
   "version": "1.0.0",
-  "description": "",
   "main": "index.js",
   "scripts": {
     "start": "nodemon server.js"
@@ -21,6 +20,9 @@
     "mongoose": "^5.9.13",
     "morgan": "^1.10.0",
     "nodemon": "^2.0.3",
-    "react-router-dom": "^5.2.0"
-  }
+    "react-router-dom": "^5.2.0",
+    "superagent": "^5.2.2"
+  },
+  "devDependencies": {},
+  "description": ""
 }

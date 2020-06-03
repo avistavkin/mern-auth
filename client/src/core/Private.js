@@ -38,7 +38,7 @@ const Private = ({history}) => {
 		})
 		.catch(error => {
 			console.log('PROFILE UPDATE ERROR', error.response.data.error);
-			if(error.response.status == 401) {
+			if(error.response.status === 401) {
 				signout(() => {
 					history.push('/');
 				});

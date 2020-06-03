@@ -5,6 +5,8 @@ const _ = require("lodash");
 const { OAuth2Client } = require("google-auth-library");
 //sendgrid
 const fetch = require('node-fetch');
+const superagent = require('superagent');
+
 
 const sgMail = require("@sendgrid/mail");
 sgMail.setApiKey(process.env.SENDGRID_API_KEY);
@@ -406,7 +408,7 @@ exports.microsoftLogin = (req, res) => {
     console.log('MICROSOFT LOGIN REQ BODY', req.body);
     const { name, email, id, accessToken } = req.body;
 
-    const url = `https://login.microsoftonline.com/${process.env.REACT_APP_MICROSOFT_TENANT_ID}`;
+    const url = `https://login.microsoftonline.com/${process.env.MICROSOFT_TENANT_ID}`;
     
     return (
         fetch(url, {method: 'GET'})
@@ -453,6 +455,115 @@ exports.microsoftLogin = (req, res) => {
             	console.log(error);
                 res.json({
                     error: 'Microsoft login failed. Try later'
+                });
+            })
+    );
+};
+
+exports.githubLogin = (req, res) => {
+    console.log('GITHUB LOGIN REQ BODY', req.body);
+    const { code } = req.body;
+    //console.log('CODE', code);
+
+    //const url = `https://login.microsoftonline.com/${process.env.MICROSOFT_TENANT_ID}`;
+    //const url = `https://github.com/login/oauth/access_token`;
+    //const url = `https://github.com/login/oauth/access_token?client_id=${process.env.GITHUB_CLIENT_ID}&redirect_uri=${process.env.GITHUB_REDIRECT_URI}&client_secret=${process.env.GITHUB_CLIENT_SECRET}&code=${code}`;
+    
+    return (
+
+
+    	 //      fetch(proxy_url, {
+      //   method: "POST",
+      //   body: JSON.stringify(requestData)
+      // })
+      //   .then(response => response.json())
+      //   .then(data => {
+      //     dispatch({
+      //       type: "LOGIN",
+      //       payload: { user: data, isLoggedIn: true }
+      //     });
+      //   })
+      //use superagent instead of fetch because cannot make fetch works...
+      superagent
+  		.post('https://github.com/login/oauth/access_token')
+    	.send({ 
+    		client_id: `${process.env.GITHUB_CLIENT_ID}`,
+    		redirect_uri: `${process.env.GITHUB_REDIRECT_URI}`,
+    		client_secret: `${process.env.GITHUB_CLIENT_SECRET}`,
+    		code: `${code}`
+		 }) // sends a JSON post body
+  		.set ('Accept', 'application/json')
+  		.end((err, res) => {
+  			const data = res.body
+  			console.log('501', data)
+  		})
+
+// superagent
+//   .post('/api/pet')
+  
+//   .set('X-API-Key', 'foobar')
+//   .set('accept', 'json')
+//   .end((err, res) => {
+//     // Calling the end function will send the request
+//   });
+
+       // fetch(url, {method: "POST"})
+        // 	//code: req.body,
+        // 	code: {code}, 
+        // 	//"88dcbeedceee8fe84a07",
+        // 	client_id: "88acaca224f60dd90316",
+        // 	//client_id: process.env.GITHUB_CLIENT_ID,
+        // 	//console.log('488CLIENTID', client_id)
+        // 	client_secret: "e51ccc29722aac4843e2314c4a14986470efb462",
+        // 	redirect_uri: "http://localhost:3000/signin",
+        // 	//client_secret: process.env.GITHUB_CLIENT_SECRET,
+        // 	//body: JSON.stringify(req.body)
+        // })
+        //res => console.log(res)
+        .then(res => console.log(res))
+          //.then(response => response.json())
+        .then(response => console.log('500RESPONSE', res))
+            //.then(response => console.log('417EMAIL, NAME', email, name))
+            .then(response => {
+                //const { email, name } = response;
+                const { email, name } = req.body;
+                User.findOne({ email }).exec((err, user) => {
+                	//console.log("423USER", user)
+                	//console.log("424USER_ID", user._id)
+                    if (user) {
+                        const token = jwt.sign({ _id: user._id }, process.env.JWT_SECRET, { expiresIn: '7d' });
+                        //console.log("427TOKEN", token);
+                        const { _id, email, name, role } = user;
+                        //console.log("431USER", user);
+                        return res.json({
+                            token,
+                            user: { _id, email, name, role }
+                        });
+                    } else {
+                        //console.log('436LET PASSWORD')
+                        let password = email + process.env.JWT_SECRET;
+                        user = new User({ name, email, password });
+                        user.save((err, data) => {
+                            if (err) {
+                                console.log('ERROR GITHUB LOGIN ON USER SAVE', err);
+                                return res.status(400).json({
+                                    error: 'User signup failed with github'
+                                });
+                            }
+                            const token = jwt.sign({ _id: data._id }, process.env.JWT_SECRET, { expiresIn: '7d' });
+                            const { _id, email, name, role } = data;
+                            return res.json({
+                                token,
+                                user: { _id, email, name, role }
+                            });
+                        });
+                    }
+                });
+            })
+            .catch(error => {
+            	console.log(error);
+                res.json({
+                    error: 'Github login failed. Try later'
                 });
             })
     );

@@ -12,6 +12,7 @@ const {
 	googleLogin,
 	facebookLogin,
 	microsoftLogin,
+	githubLogin,
 } = require("../controllers/auth");
 
 //import validators
@@ -47,6 +48,7 @@ router.put(
 router.post("/google-login", googleLogin);
 router.post("/facebook-login", facebookLogin);
 router.post("/microsoft-login", microsoftLogin);
+router.post("/github-login", githubLogin);
 
 
 module.exports = router;

@@ -4,11 +4,11 @@ import MicrosoftLogin from "react-microsoft-login";
 
 const Microsoft = ({ informParent = (f) => f }) => {
 	  	const responseMicrosoft = (err, authData) => {
-      	console.log(err, authData);
-      	console.log('ACCESSTOKEN', authData.authResponseWithAccessToken.accessToken);
-      	console.log('EMAIL', authData.authResponseWithAccessToken.account.userName)
-		console.log('USERNAME', authData.authResponseWithAccessToken.account.name)
-		console.log('ID', authData.authResponseWithAccessToken.account.accountIdentifier);
+  //     	console.log(err, authData);
+  //     	console.log('ACCESSTOKEN', authData.authResponseWithAccessToken.accessToken);
+  //     	console.log('EMAIL', authData.authResponseWithAccessToken.account.userName)
+		// console.log('USERNAME', authData.authResponseWithAccessToken.account.name)
+		// console.log('ID', authData.authResponseWithAccessToken.account.accountIdentifier);
 		axious({
 			method: "POST",
 		 	url: `${process.env.REACT_APP_API}/microsoft-login`,
@@ -37,7 +37,7 @@ const Microsoft = ({ informParent = (f) => f }) => {
 				clientId={`${process.env.REACT_APP_MICROSOFT_CLIENT_ID}`}
 				authCallback={responseMicrosoft}
 				buttonTheme = "dark_short"
-				debug = {true}
+				debug = {false}
 				children = {
 					<button className="btn btn-blue btn-lg btn-block">
 						<i className="fab fa-microsoft pr-2"></i> Login with Microsoft
