@@ -1,3 +1,4 @@
+const axious = require ("axios");
 const User = require("../models/user");
 const jwt = require("jsonwebtoken");
 const expressJwt = require("express-jwt");
@@ -6,6 +7,7 @@ const { OAuth2Client } = require("google-auth-library");
 //sendgrid
 const fetch = require('node-fetch');
 const superagent = require('superagent');
+
 
 
 const sgMail = require("@sendgrid/mail");
@@ -463,28 +465,36 @@ exports.microsoftLogin = (req, res) => {
 exports.githubLogin = (req, res) => {
     console.log('GITHUB LOGIN REQ BODY', req.body);
     const { code } = req.body;
-    //console.log('CODE', code);
+    console.log('CODE', code);
 
     //const url = `https://login.microsoftonline.com/${process.env.MICROSOFT_TENANT_ID}`;
     //const url = `https://github.com/login/oauth/access_token`;
-    //const url = `https://github.com/login/oauth/access_token?client_id=${process.env.GITHUB_CLIENT_ID}&redirect_uri=${process.env.GITHUB_REDIRECT_URI}&client_secret=${process.env.GITHUB_CLIENT_SECRET}&code=${code}`;
+    const url = `https://github.com/login/oauth/access_token?client_id=${process.env.GITHUB_CLIENT_ID}&redirect_uri=${process.env.GITHUB_REDIRECT_URI}&client_secret=${process.env.GITHUB_CLIENT_SECRET}&code=${code}`;
     
-    return (
+	 	// axious({
+	 	// 	method: "POST",
+	 	// 	url: `https://github.com/login/oauth/access_token?client_id=${process.env.GITHUB_CLIENT_ID}&redirect_uri=${process.env.GITHUB_REDIRECT_URI}&client_secret=${process.env.GITHUB_CLIENT_SECRET}&code=${code}`,
+			
+			// headers: {
+   //          'Content-Type': 'application/json'}
+			// //data: {code: response.code},			
+	 	// })
+	 	// 	.then((response) => {
+	 	// 		// access_token = JSON.parse(response)['access_token']
+	 	// 		// console.log("482ACCESS TOKEN", JSON.stringify()access_token);
+	 	// 		console.log("480GITHUB SIGNIN SUCCESS stringify", JSON.stringify(response.data));
+	 			
+
+	 	// 	})
+	 	// 	.catch((error) => {
+	 	// 		console.log("GITHUB SIGNIN ERROR", error.response);
+	 	// 	})
+	 	// console.log('486Line')
+       	
 
 
-    	 //      fetch(proxy_url, {
-      //   method: "POST",
-      //   body: JSON.stringify(requestData)
-      // })
-      //   .then(response => response.json())
-      //   .then(data => {
-      //     dispatch({
-      //       type: "LOGIN",
-      //       payload: { user: data, isLoggedIn: true }
-      //     });
-      //   })
-      //use superagent instead of fetch because cannot make fetch works...
-      superagent
+
+        superagent
   		.post('https://github.com/login/oauth/access_token')
     	.send({ 
     		client_id: `${process.env.GITHUB_CLIENT_ID}`,
@@ -494,39 +504,93 @@ exports.githubLogin = (req, res) => {
 		 }) // sends a JSON post body
   		.set ('Accept', 'application/json')
   		.end((err, res) => {
-  			const data = res.body
-  			console.log('501', data)
-  		})
+  			const token = res.body.access_token
+  			console.log('501LINE', token)
+  			  		const auth = `Bearer ${token}`
+  		console.log('512LINE - auth', auth)
+  		})	
 
-// superagent
-//   .post('/api/pet')
-  
-//   .set('X-API-Key', 'foobar')
-//   .set('accept', 'json')
-//   .end((err, res) => {
-//     // Calling the end function will send the request
-//   });
 
-       // fetch(url, {method: "POST"})
-        // 	//code: req.body,
-        // 	code: {code}, 
-        // 	//"88dcbeedceee8fe84a07",
-        // 	client_id: "88acaca224f60dd90316",
-        // 	//client_id: process.env.GITHUB_CLIENT_ID,
-        // 	//console.log('488CLIENTID', client_id)
-        // 	client_secret: "e51ccc29722aac4843e2314c4a14986470efb462",
-        // 	redirect_uri: "http://localhost:3000/signin",
-        // 	//client_secret: process.env.GITHUB_CLIENT_SECRET,
-        // 	//body: JSON.stringify(req.body)
-        // })
-        //res => console.log(res)
-        .then(res => console.log(res))
-          //.then(response => response.json())
-        .then(response => console.log('500RESPONSE', res))
-            //.then(response => console.log('417EMAIL, NAME', email, name))
-            .then(response => {
-                //const { email, name } = response;
-                const { email, name } = req.body;
+
+//bfcc1a189535c001552f405ee6111110171d296a
+//Authorization: `Bearer ${access_token}`
+//Authorization: `Bearer ${token}` 
+
+
+
+	 	// axious({
+	 	// 	method: "GET",
+	 	// 	url: `https://api.github.com/user`,
+			// headers: {
+   //          	'Content-Type': 'application/json',
+   //          	 Authorization: `Bearer a3d3bd07aabc147a4293d2423c0b3a57d4178074`, 
+   //          	// a3d3bd07aabc147a4293d2423c0b3a57d4178074   	
+   //      	}
+			// //data: {code: response.code},			
+	 	// })
+	 	// 	.then((response) => {
+	 	// 		// access_token = JSON.parse(response)['access_token']
+	 	// 		// console.log("482ACCESS TOKEN", JSON.stringify()access_token);
+	 			
+	 	// 		console.log("523GITHUB SIGNIN SUCCESS stringify - login", JSON.stringify(response.data.login));
+	 	// 		console.log("524GITHUB SIGNIN SUCCESS stringify - email", JSON.stringify(response.data.email));
+	 			
+
+	 	// 	})
+	 	// 	.catch((error) => {
+	 	// 		console.log("GITHUB SIGNIN ERROR", error.response);
+	 	// 	})
+
+
+
+
+
+
+   //     	superagent
+  	//  		.get('https://api.github.com/user')
+  	//  		console.log('489Line')
+			// .set ('Authorization: token' + response.data)
+	  // 		console.log('497Line')
+	  // 		.end((err, res) => {
+	  // 			const data = res.body
+	  // 			console.log('499Line', data)
+  	//  	})
+
+    // fetch(url, {
+    //    	method: "POST",
+    //    	headers: {
+    //   		'Accept': 'application/json',
+    // 	},
+    //  })
+    // .then(function(res){ console.log(res) })
+
+
+
+
+
+    return (
+
+
+
+
+	 	axious({
+	 		method: "GET",
+	 		url: `https://api.github.com/user`,
+			headers: {
+            	'Content-Type': 'application/json',
+            	 Authorization: `Bearer a3d3bd07aabc147a4293d2423c0b3a57d4178074`, 
+            	// a3d3bd07aabc147a4293d2423c0b3a57d4178074   	
+        	}
+			//data: {code: response.code},			
+	 	})
+	 		.then((response) => {
+	 			// access_token = JSON.parse(response)['access_token']
+	 			// console.log("482ACCESS TOKEN", JSON.stringify()access_token);
+	 			const { email, name } = response.data
+
+	 			console.log("668GITHUB SIGNIN SUCCESS stringify - login", name);
+	 			console.log("669GITHUB SIGNIN SUCCESS stringify - email", email);
+	 			console.log("684GITHUB email", email);
                 User.findOne({ email }).exec((err, user) => {
                 	//console.log("423USER", user)
                 	//console.log("424USER_ID", user._id)
@@ -559,12 +623,11 @@ exports.githubLogin = (req, res) => {
                         });
                     }
                 });
-            })
-            .catch(error => {
-            	console.log(error);
-                res.json({
-                    error: 'Github login failed. Try later'
-                });
-            })
+	 		})
+
+	 		.catch((error) => {
+	 			console.log("GITHUB SIGNIN ERROR", error.response);
+	 		})
+
     );
 };
