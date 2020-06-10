@@ -1,8 +1,11 @@
 import React from "react";
+import {Link} from 'react-router-dom'
+import ReactDOM from 'react-dom';
 import axious from "axios";
-import MicrosoftLogin from "react-microsoft-login";
+import GithubLogin from "react-github-login";
 
-	const Github = ({ informParent = (f) => f }) => {
+const Github = ({ informParent = (f) => f }) => {
+	//const responseGithub = response => console.log(response);
 	const responseGithub = (response) => {
 	 	console.log(response);
 	 	
@@ -20,25 +23,59 @@ import MicrosoftLogin from "react-microsoft-login";
 	 			console.log("GITHUB SIGNIN ERROR", error.response);
 	 		});
 	 };
-
 	return (
 		<div className="pb-3">
-			<MicrosoftLogin
+			<GithubLogin
 				clientId={`${process.env.REACT_APP_GITHUB_CLIENT_ID}`}
 				redirectUri= {`${process.env.REACT_APP_CLIENT_URL}`}
-				clientId={`${process.env.REACT_APP_MICROSOFT_CLIENT_ID}`}
-				authCallback={responseGithub}
-				buttonTheme = "light_short"
-				debug = {false}
-				children = {
-					<button className="btn btn-dark btn-lg btn-block">
-						<i className="fab fa-github pr-2"></i> Login with GitHub
-					</button>
-				}
+				onSuccess={responseGithub}
+				onFailure={responseGithub}
+//				buttonText= "blablabla"
+//				authCallback={responseGithub}
+//				buttonTheme="dark_short"
 
-			/>
+
+
+				render={(renderProps) => (
+				<button type="button" class="btn btn-block btn-social btn-github">Light</button>
+				)}
+				//debug={true}
+// 				<a id="github-button" class="btn btn-block btn-social btn-github">
+//     <i class="fa fa-github"></i> Sign in with GitHub
+// </a>
+				///>
+					
+						//<button  
+						// 	className="btn btn-dark btn-lg btn-block"
+						// 	onSuccess={responseGithub}
+						// 	onFailure={responseGithub}
+						// 	OnClick ={responseGithub}>
+						// 	<i className="fab fa-github pr-2"></i> Login with GitHub
+						// </button>
+
+
+					
+
+
+					
+					
+				
+
+						/>
+			
 		</div>
 	);
- };
+};
 
 export default Github;
+
+
+// const onSuccess = response => console.log(response);
+// const onFailure = response => console.error(response);
+ 
+// ReactDOM.render(
+//   <GitHubLogin clientId="ac56fad434a3a3c1561e"
+//     onSuccess={onSuccess}
+//     onFailure={onFailure}/>,
+//   document.getElementById('example')
+// );

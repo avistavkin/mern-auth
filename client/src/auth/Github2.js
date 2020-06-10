@@ -23,50 +23,29 @@ const Github = ({ informParent = (f) => f }) => {
 	 			console.log("GITHUB SIGNIN ERROR", error.response);
 	 		});
 	 };
+
 	return (
 		<div className="pb-3">
 			<GithubLogin
 				clientId={`${process.env.REACT_APP_GITHUB_CLIENT_ID}`}
 				redirectUri= {`${process.env.REACT_APP_CLIENT_URL}`}
-//				onSuccess={responseGithub}
-//				onFailure={responseGithub}
-//				buttonText= "blablabla"
-//				authCallback={responseGithub}
-//				buttonTheme="dark_short"
+				authCallback={responseGithub}
+				//buttonTheme = "light_short"
+				//debug = {false}
 
+				//кнопка нормальная
+				// children = {
+				// 	<button className="btn btn-dark btn-lg btn-block">
+				// 		<i className="fab fa-github pr-2"></i> Login with GitHub
+				// 	</button>
+				// }
 
-				// render={(renderProps) => (
-				// <button type="button" class="btn btn-block btn-social btn-github">Light</button>
-				// )}
-//				debug={true}
-// 				<a id="github-button" class="btn btn-block btn-social btn-github">
-//     <i class="fa fa-github"></i> Sign in with GitHub
-// </a>
-				/>
-					
-						<button  
-							className="btn btn-dark btn-lg btn-block"
-							onSuccess={responseGithub}
-							onFailure={responseGithub}
-							OnClick ={responseGithub}>
-							<i className="fab fa-github pr-2"></i> Login with GitHub
-						</button>
-
-
-					
-
-
-					
-					
-				
-
-
-			
+			/>
 		</div>
 	);
-};
+ };
 
-export default Github;
+ export default Github;
 
 
 // const onSuccess = response => console.log(response);
