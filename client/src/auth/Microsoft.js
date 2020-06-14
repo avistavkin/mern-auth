@@ -13,10 +13,7 @@ const Microsoft = ({ informParent = (f) => f }) => {
 		 		email: authData.authResponseWithAccessToken.account.userName,
 		 		name: authData.authResponseWithAccessToken.account.name
 		 	},
-
-
 		})
-
 		.then((authData) => {
 		 	console.log("MICROSOFT SIGNIN SUCCESS", authData);
 		 		//inform parent component

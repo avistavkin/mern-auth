@@ -465,40 +465,9 @@ exports.microsoftLogin = (req, res) => {
 exports.githubLogin = (req, res) => {
     console.log('GITHUB LOGIN REQ BODY', req.body);
     const { code } = req.body;
-    console.log('CODE', code);
+//    console.log('CODE', code);
     const url = `https://github.com/login/oauth/access_token?client_id=${process.env.GITHUB_CLIENT_ID}&redirect_uri=${process.env.GITHUB_REDIRECT_URI}&client_secret=${process.env.GITHUB_CLIENT_SECRET}&code=${code}`;
     
-    // этот код рабочий, только axious не умеет вычленять bearer token, так как это умеет superagent :(
-    // ответ получается такой - access_token=42661ee1d95355621268&scope=user%3Aemail&token_type=bearer    
-   //  axious({
-	 	// 	method: "POST",
-	 	// 	url: `https://github.com/login/oauth/access_token`,
-			// headers: {
-   //          	'Content-Type': 'application/json',
-   //      	},
-			// data: {
-	  //   		client_id: `${process.env.GITHUB_CLIENT_ID}`,
-	  //   		redirect_uri: `${process.env.GITHUB_REDIRECT_URI}`,
-	  //   		client_secret: `${process.env.GITHUB_CLIENT_SECRET}`,
-	  //   		code: `${code}`
-			// },			
-	 	// })
-	 	// 	.then((response) => {
-
-	 	// 		console.log('488LINE!!!!!!!!!!!!!!!', JSON.stringify(response.data));
-	 	// });
-
-
-
-
-
-
-
-    
-        
-
-
-
         superagent
   		.post('https://github.com/login/oauth/access_token')
     	.send({ 
@@ -510,10 +479,7 @@ exports.githubLogin = (req, res) => {
   		.set ('Accept', 'application/json')
   		.end((err, result) => {
   			const token = result.body.access_token
-  			console.log('483LINE', token)
-  			const auth = `Bearer `+ token;
-  			console.log('485LINE - auth', auth)
-
+  			//console.log('483LINE', token)
   			axious({
 	 		method: "GET",
 	 		url: `https://api.github.com/user`,
@@ -526,12 +492,12 @@ exports.githubLogin = (req, res) => {
 	 	})
   				.then((response) => {
 	 			const { email, login } = response.data
-	 			console.log("668GITHUB SIGNIN SUCCESS stringify - login", login);
-	 			console.log("669GITHUB SIGNIN SUCCESS stringify - email", email);
-	 			console.log("684GITHUB email", email);
+	 			//console.log("668GITHUB SIGNIN SUCCESS stringify - login", login);
+	 			//console.log("669GITHUB SIGNIN SUCCESS stringify - email", email);
+	 			//console.log("684GITHUB email", email);
 	 			User.findOne({ email }).exec((err, user) => {
-                	console.log("423USER", user)
-                	console.log("424USER_ID", user._id)
+                	//console.log("423USER", user)
+                	//console.log("424USER_ID", user._id)
                     if (user) {
                         const token = jwt.sign({ _id: user._id }, process.env.JWT_SECRET, { expiresIn: '7d' });
                         //console.log("427TOKEN", token);
@@ -567,83 +533,5 @@ exports.githubLogin = (req, res) => {
 	 			console.log("GITHUB SIGNIN ERROR", error);
 	 		})
 
-
-
-	 		
   		})
-  
-
-  //Всё понтно - переменные не передяются дальше скобок
-
-  
-
-  		//const token = "18931388332bbfec5ae7901d26d670f6358c3ff4";
-  		//const auth = "Bearer 18931388332bbfec5ae7901d26d670f6358c3ff4"
-  		//вся проблема теперь передать токен в строку 'Authorization': `Bearer ${token}`, 
-
-   //  return (
-	 	
-    	
-	 	// axious({
-	 	// 	method: "GET",
-	 	// 	url: `https://api.github.com/user`,
-			// headers: {
-   //          	'Content-Type': 'application/json',
-   //          	//'Authorization': `${auth}`,
-   //          	//'Authorization': `Bearer ${token}`, 
-
-            	 	
-   //      	}
-			// //data: {code: response.code},			
-	 	// })
-	 	// 	.then((response) => {
-	 	// 		// access_token = JSON.parse(response)['access_token']
-	 	// 		// console.log("482ACCESS TOKEN", JSON.stringify()access_token);
-	 	// 		const { email, login } = response.data
-
-	 	// 		console.log("668GITHUB SIGNIN SUCCESS stringify - login", login);
-	 	// 		console.log("669GITHUB SIGNIN SUCCESS stringify - email", email);
-	 	// 		console.log("684GITHUB email", email);
-   //              User.findOne({ email }).exec((err, user) => {
-   //              	//console.log("423USER", user)
-   //              	//console.log("424USER_ID", user._id)
-   //                  if (user) {
-   //                      const token = jwt.sign({ _id: user._id }, process.env.JWT_SECRET, { expiresIn: '7d' });
-   //                      //console.log("427TOKEN", token);
-   //                      const { _id, email, login, role } = user;
-   //                      //console.log("431USER", user);
-   //                      return res.json({
-   //                          token,
-   //                          user: { _id, email, login, role }
-   //                      });
-   //                  } else {
-   //                      //console.log('436LET PASSWORD')
-   //                      let password = email + process.env.JWT_SECRET;
-   //                     let name = login; //попробовать обмануть, т.к. в GitHub часть name пустой...
-   //                     user = new User({ name, email, password });
-   //                      user.save((err, data) => {
-   //                          if (err) {
-   //                              console.log('ERROR GITHUB LOGIN ON USER SAVE', err);
-   //                              return res.status(400).json({
-   //                                  error: 'User signup failed with github'
-   //                              });
-   //                          }
-   //                          const token = jwt.sign({ _id: data._id }, process.env.JWT_SECRET, { expiresIn: '7d' });
-   //                          const { _id, email, login, role } = data;
-   //                          return res.json({
-   //                              token,
-   //                              user: { _id, email, login, role }
-   //                          });
-   //                      });
-   //                  }
-   //              });
-	 	// 	})
-
-	 	// 	.catch((error) => {
-	 	// 		console.log("GITHUB SIGNIN ERROR", error);
-	 	// 	})
-
-   //  );
-
- 
 };
