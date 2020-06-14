@@ -10,6 +10,7 @@ const superagent = require('superagent');
 
 
 
+
 const sgMail = require("@sendgrid/mail");
 sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
@@ -465,9 +466,9 @@ exports.microsoftLogin = (req, res) => {
 exports.githubLogin = (req, res) => {
     console.log('GITHUB LOGIN REQ BODY', req.body);
     const { code } = req.body;
-//    console.log('CODE', code);
+    console.log('CODE', code);
     const url = `https://github.com/login/oauth/access_token?client_id=${process.env.GITHUB_CLIENT_ID}&redirect_uri=${process.env.GITHUB_REDIRECT_URI}&client_secret=${process.env.GITHUB_CLIENT_SECRET}&code=${code}`;
-    
+
         superagent
   		.post('https://github.com/login/oauth/access_token')
     	.send({ 
@@ -479,22 +480,17 @@ exports.githubLogin = (req, res) => {
   		.set ('Accept', 'application/json')
   		.end((err, result) => {
   			const token = result.body.access_token
-  			//console.log('483LINE', token)
   			axious({
 	 		method: "GET",
 	 		url: `https://api.github.com/user`,
 			headers: {
             	'Content-Type': 'application/json',
-            	//'Authorization': `${auth}`,
             	'Authorization': `Bearer ${token}`, 	 	
         	}
-			//data: {code: response.code},			
+			
 	 	})
   				.then((response) => {
 	 			const { email, login } = response.data
-	 			//console.log("668GITHUB SIGNIN SUCCESS stringify - login", login);
-	 			//console.log("669GITHUB SIGNIN SUCCESS stringify - email", email);
-	 			//console.log("684GITHUB email", email);
 	 			User.findOne({ email }).exec((err, user) => {
                 	//console.log("423USER", user)
                 	//console.log("424USER_ID", user._id)
@@ -502,7 +498,7 @@ exports.githubLogin = (req, res) => {
                         const token = jwt.sign({ _id: user._id }, process.env.JWT_SECRET, { expiresIn: '7d' });
                         //console.log("427TOKEN", token);
                         const { _id, email, login, role } = user;
-                        console.log("539USER", user);
+//                        console.log("539USER", user);
                         return res.json({
                             token,
                             user: { _id, email, login, role }
@@ -530,7 +526,7 @@ exports.githubLogin = (req, res) => {
                 });
 	 		})
   				 		.catch((error) => {
-	 			console.log("GITHUB SIGNIN ERROR", error);
+//	 			console.log("GITHUB SIGNIN ERROR", error);
 	 		})
 
   		})
