@@ -469,6 +469,15 @@ exports.githubLogin = (req, res) => {
     console.log('CODE', code);
     const url = `https://github.com/login/oauth/access_token?client_id=${process.env.GITHUB_CLIENT_ID}&redirect_uri=${process.env.GITHUB_REDIRECT_URI}&client_secret=${process.env.GITHUB_CLIENT_SECRET}&code=${code}`;
 
+ //===============это кусок замены для superagent================       
+	 	// fetch(url, {method: 'POST'}).then(result => result.text())  
+	 	// 	.then(text => {
+	 	// 		console.log('text', text)
+			// 	access_token = JSON.parse(text)['access_token']	
+ 		// 	})
+ //===============это кусок замены для superagent================ 
+
+
         superagent
   		.post('https://github.com/login/oauth/access_token')
     	.send({ 
@@ -480,54 +489,65 @@ exports.githubLogin = (req, res) => {
   		.set ('Accept', 'application/json')
   		.end((err, result) => {
   			const token = result.body.access_token
-  			axious({
-	 		method: "GET",
-	 		url: `https://api.github.com/user`,
-			headers: {
-            	'Content-Type': 'application/json',
-            	'Authorization': `Bearer ${token}`, 	 	
-        	}
+  			const scope = result.body.scope
+  			
+
+  			if (scope.includes('user:email'))
+  			//has_user_email_scope = scope? 'user:email'
+  			{
+  				console.log('SCOPE', scope.includes('user:email'))
+  				//console.log('HAS_USER_SCOPE', has_user_email_scope)
+  				axious({
+		 			method: "GET",
+		 			url: `https://api.github.com/user`,
+					headers: {
+	            		'Content-Type': 'application/json',
+	            		'Authorization': `Bearer ${token}`, 	 	
+	        		}
+				})
 			
-	 	})
   				.then((response) => {
-	 			const { email, login } = response.data
-	 			User.findOne({ email }).exec((err, user) => {
+	 				const { email, login } = response.data
+	 				User.findOne({ email }).exec((err, user) => {
                 	//console.log("423USER", user)
                 	//console.log("424USER_ID", user._id)
-                    if (user) {
-                        const token = jwt.sign({ _id: user._id }, process.env.JWT_SECRET, { expiresIn: '7d' });
-                        //console.log("427TOKEN", token);
-                        const { _id, email, login, role } = user;
-//                        console.log("539USER", user);
-                        return res.json({
-                            token,
-                            user: { _id, email, login, role }
-                        });
-                    } else {
-                        //console.log('436LET PASSWORD')
-                        let password = email + process.env.JWT_SECRET;
-                       let name = login; //попробовать обмануть, т.к. в GitHub часть name пустой...
-                       user = new User({ name, email, password });
-                        user.save((err, data) => {
-                            if (err) {
-                                console.log('ERROR GITHUB LOGIN ON USER SAVE', err);
-                                return res.status(400).json({
-                                    error: 'User signup failed with github'
-                                });
-                            }
-                            const token = jwt.sign({ _id: data._id }, process.env.JWT_SECRET, { expiresIn: '7d' });
-                            const { _id, email, login, role } = data;
-                            return res.json({
-                                token,
-                                user: { _id, email, login, role }
-                            });
-                        });
-                    }
-                });
-	 		})
-  				 		.catch((error) => {
+	                    if (user) {
+	                        const token = jwt.sign({ _id: user._id }, process.env.JWT_SECRET, { expiresIn: '7d' });
+	                        //console.log("427TOKEN", token);
+	                        const { _id, email, login, role } = user;
+	//                        console.log("539USER", user);
+	                        return res.json({
+	                            token,
+	                            user: { _id, email, login, role }
+	                        });
+	                    } else {
+	                        //console.log('436LET PASSWORD')
+	                        let password = email + process.env.JWT_SECRET;
+	                       let name = login; //попробовать обмануть, т.к. в GitHub часть name пустой...
+	                       user = new User({ name, email, password });
+	                        user.save((err, data) => {
+	                            if (err) {
+	                                console.log('ERROR GITHUB LOGIN ON USER SAVE', err);
+	                                return res.status(400).json({
+	                                    error: 'User signup failed with github'
+	                                });
+	                            }
+	                            const token = jwt.sign({ _id: data._id }, process.env.JWT_SECRET, { expiresIn: '7d' });
+	                            const { _id, email, login, role } = data;
+	                            return res.json({
+	                                token,
+	                                user: { _id, email, login, role }
+	                            });
+	                        });
+	                    }
+	                });
+	 			})
+  				.catch((error) => {
 //	 			console.log("GITHUB SIGNIN ERROR", error);
-	 		})
+	 			})
+	 		}else{
+	 			console.log('SEEMS THE PROBLEM WITH SCOPE', scope.includes('user:email'))
+	 		}
 
   		})
 };
